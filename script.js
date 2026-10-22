@@ -106,45 +106,29 @@ if (sceneContainer && typeof THREE !== "undefined") {
     scene.add(pointLight);
 
 
-// Track mouse movement for the 3D camera
-
-let targetMouseX = 0;
-let targetMouseY = 0;
-
-hero.addEventListener("mouseleave", () => {
-    const rect = sceneContainer.getBoundingClientRect();
-
-    targetMouseX =
-        ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-
-    targetMouseY =
-        ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-});
-
-hero.addEventListener("mousemove", (event) => {
-    const rect = hero.getBoundingClientRect();
-
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    // Rotate the 3D object
-    object.rotation.x += 0.003;
-    object.rotation.y += 0.005;
-
-    // Smooth camera movement
-    camera.position.x +=
-        (targetMouseX * 1.2 - camera.position.x) * 0.04;
-
-    camera.position.y +=
-        (-targetMouseY * 0.8 - camera.position.y) * 0.04;
-
-    // Always look toward the object
-    camera.lookAt(0, 0, 0);
-
-    renderer.render(scene, camera);
-}
-
+// Track the mouse across the hero section.
+    let targetMouseX = 0;
+    let targetMouseY = 0;
+    if (hero) {
+        hero.addEventListener("mousemove", (event) => {
+            const rect = hero.getBoundingClientRect();
+            targetMouseX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+            targetMouseY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+        });
+        hero.addEventListener("mouseleave", () => {
+            targetMouseX = 0;
+            targetMouseY = 0;
+        });
+    }
+    function animate() {
+        requestAnimationFrame(animate);
+        object.rotation.x += 0.003;
+        object.rotation.y += 0.005;
+        camera.position.x += (targetMouseX * 1.2 - camera.position.x) * 0.04;
+        camera.position.y += (-targetMouseY * 0.8 - camera.position.y) * 0.04;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+    }
 
     animate();
 
