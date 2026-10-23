@@ -1,9 +1,11 @@
 
 const helloButton = document.getElementById("helloButton");
 
-helloButton.addEventListener("click", function () {
-    alert("Welcome to K9INE Labs! Thanks for visiting.");
-});
+if (helloButton) {
+    helloButton.addEventListener("click", function () {
+        alert("Welcome to K9INE Labs! Thanks for visiting.");
+    });
+}
 
 /* K9INE LABS: INTERACTIVE 3D CARDS */
 
