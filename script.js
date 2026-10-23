@@ -89,8 +89,8 @@ if (sceneContainer && typeof THREE !== "undefined") {
 
     const material = new THREE.MeshStandardMaterial({
         color: 0x8b5cf6,
-        metalness: 0.6,
-        roughness: 0.25,
+        metalness: 0.35,
+        roughness: 0.35,
         wireframe: true
     });
 
@@ -98,12 +98,17 @@ if (sceneContainer && typeof THREE !== "undefined") {
     scene.add(object);
 
     // Add lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+    const ambientLight = new THREE.AmbientLight(0x8b7bd1, 1.2);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xa78bfa, 40);
+    const pointLight = new THREE.PointLight(0xa78bfa, 35);
     pointLight.position.set(3, 3, 5);
     scene.add(pointLight);
+
+    // A cool rim light gives the knot more depth.
+    const rimLight = new THREE.PointLight(0x4f46e5, 24);
+    rimLight.position.set(-3, -2, -3);
+    scene.add(rimLight);
 
 
 // Track the mouse across the hero section.
@@ -120,12 +125,15 @@ if (sceneContainer && typeof THREE !== "undefined") {
             targetMouseY = 0;
         });
     }
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function animate() {
         requestAnimationFrame(animate);
-        object.rotation.x += 0.003;
-        object.rotation.y += 0.005;
-        camera.position.x += (targetMouseX * 1.2 - camera.position.x) * 0.04;
-        camera.position.y += (-targetMouseY * 0.8 - camera.position.y) * 0.04;
+        if (!reducedMotion) {
+            object.rotation.x += 0.002;
+            object.rotation.y += 0.0035;
+        }
+        camera.position.x += ((reducedMotion ? 0 : targetMouseX * 1.0) - camera.position.x) * 0.025;
+        camera.position.y += ((reducedMotion ? 0 : -targetMouseY * 0.65) - camera.position.y) * 0.025;
         camera.lookAt(0, 0, 0);
         renderer.render(scene, camera);
     }
