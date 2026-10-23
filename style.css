@@ -486,3 +486,28 @@ nav a {
 .contact-section > p:not(.section-eyebrow) { max-width: 530px; margin: 0 auto; }
 .contact-link { margin-top: 26px; }
 @media (max-width: 750px) { .about-layout { grid-template-columns: 1fr; } .skills-panel { padding: 22px; } }
+
+/* MOBILE THREE.JS VISIBILITY FIX */
+@media (max-width: 700px) {
+    .hero {
+        min-height: 850px;
+        padding-bottom: 330px;
+    }
+    #three-container {
+        position: absolute;
+        z-index: 0;
+        width: min(100%, 390px);
+        height: 300px;
+        left: 50%;
+        right: auto;
+        top: auto;
+        bottom: 10px;
+        transform: translateX(-50%);
+        opacity: 1;
+        pointer-events: none;
+    }
+    .hero > :not(#three-container) {
+        position: relative;
+        z-index: 1;
+    }
+}
