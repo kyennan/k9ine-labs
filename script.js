@@ -130,10 +130,10 @@ if (sceneContainer && typeof THREE !== "undefined") {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function animate() {
         requestAnimationFrame(animate);
-        if (!reducedMotion) {
-            object.rotation.x += 0.002;
-            object.rotation.y += 0.0035;
-        }
+        // Keep the 3D sculpture moving on touch devices, even when the
+        // system requests reduced motion. Use a gentler speed in that case.
+        object.rotation.x += reducedMotion ? 0.0005 : 0.002;
+        object.rotation.y += reducedMotion ? 0.0008 : 0.0035;
         camera.position.x += ((reducedMotion ? 0 : targetMouseX * 1.0) - camera.position.x) * 0.025;
         camera.position.y += ((reducedMotion ? 0 : -targetMouseY * 0.65) - camera.position.y) * 0.025;
         camera.lookAt(0, 0, 0);
