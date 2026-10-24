@@ -511,3 +511,8 @@ nav a {
         z-index: 1;
     }
 }
+
+/* Project links: live demo and source code */
+.project-actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 16px; }
+.project-actions .project-link { display: inline-flex; align-items: center; }
+.project-actions .project-link:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; border-radius: 3px; }
