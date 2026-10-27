@@ -191,3 +191,53 @@ if ("IntersectionObserver" in window &&
         revealObserver.observe(item);
     });
 }
+
+/* NAVIGATION 2.0 */
+const navToggle = document.querySelector(".nav-toggle");
+const siteNav = document.getElementById("site-nav");
+const navLinks = siteNav ? Array.from(siteNav.querySelectorAll('a[href^="#"]')) : [];
+
+function closeMobileNav() {
+    if (!navToggle || !siteNav) return;
+    siteNav.classList.remove("is-open");
+    navToggle.setAttribute("aria-expanded", "false");
+    navToggle.setAttribute("aria-label", "Open navigation");
+}
+if (navToggle && siteNav) {
+    navToggle.addEventListener("click", () => {
+        const open = siteNav.classList.toggle("is-open");
+        navToggle.setAttribute("aria-expanded", String(open));
+        navToggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+    });
+    navLinks.forEach(link => link.addEventListener("click", closeMobileNav));
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeMobileNav();
+    });
+    document.addEventListener("click", event => {
+        if (!siteNav.contains(event.target) && !navToggle.contains(event.target)) closeMobileNav();
+    });
+    window.matchMedia("(min-width: 601px)").addEventListener("change", closeMobileNav);
+}
+
+const navSections = navLinks
+    .map(link => document.getElementById(link.hash.slice(1)))
+    .filter(Boolean);
+function updateActiveNav() {
+    const marker = window.scrollY + Math.min(window.innerHeight * 0.35, 240);
+    let currentId = navSections[0] ? navSections[0].id : "";
+    navSections.forEach(section => {
+        if (section.offsetTop <= marker) currentId = section.id;
+    });
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5) {
+        currentId = navSections[navSections.length - 1]?.id || currentId;
+    }
+    navLinks.forEach(link => {
+        const active = link.hash === "#" + currentId;
+        link.classList.toggle("active", active);
+        if (active) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+    });
+}
+window.addEventListener("scroll", updateActiveNav, { passive: true });
+window.addEventListener("resize", updateActiveNav);
+updateActiveNav();
