@@ -742,3 +742,33 @@ header nav a.active::after { transform: scaleX(1); }
 @media (prefers-reduced-motion: reduce) {
     .contact-actions .contact-secondary { transition: none; }
 }
+
+/* K9INE LABS 1.0: ACCESSIBILITY & FINISHING TOUCHES */
+.skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1000;
+    transform: translateY(-150%);
+    padding: 12px 18px;
+    border: 2px solid #e8ddff;
+    border-radius: 8px;
+    background: #211637;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+}
+.skip-link:focus { transform: translateY(0); }
+:where(a, button):focus-visible {
+    outline: 3px solid #d8c7ff;
+    outline-offset: 4px;
+}
+#main-content { display: block; }
+.project-image-preview img { max-width: 100%; }
+@media (hover: none), (pointer: coarse) {
+    .project-card:hover .project-image-preview img { transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .reveal-ready, .reveal-ready.reveal-visible { opacity: 1; transform: none; filter: none; transition: none; }
+    .project-card, .project-card:hover { transform: none !important; }
+}
