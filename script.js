@@ -120,7 +120,8 @@ if (sceneContainer && typeof THREE !== "undefined") {
         });
     }
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reducedMotion = motionPreference.matches;
     const clock = new THREE.Clock();
     let frameId = null;
     let running = false;
@@ -135,6 +136,7 @@ if (sceneContainer && typeof THREE !== "undefined") {
         camera.updateProjectionMatrix();
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, phoneMedia.matches ? 1.25 : 1.75));
         renderer.setSize(width, height);
+        if (motionPreference.matches) renderer.render(scene, camera);
     }
     resizeScene();
     window.addEventListener("resize", resizeScene);
@@ -159,7 +161,7 @@ if (sceneContainer && typeof THREE !== "undefined") {
         renderer.render(scene, camera);
     }
     function syncRendering() {
-        const shouldRun = !document.hidden && sceneInView;
+        const shouldRun = !document.hidden && sceneInView && !motionPreference.matches;
         if (shouldRun === running) return;
         running = shouldRun;
         if (running) {
@@ -179,6 +181,11 @@ if (sceneContainer && typeof THREE !== "undefined") {
         sceneObserver.observe(sceneContainer);
     }
     document.addEventListener("visibilitychange", syncRendering);
+    motionPreference.addEventListener("change", () => {
+        if (motionPreference.matches) renderer.render(scene, camera);
+        syncRendering();
+    });
+    if (motionPreference.matches) renderer.render(scene, camera);
     syncRendering();
 }
 
@@ -192,7 +199,7 @@ if ("IntersectionObserver" in window &&
         "#projects .section-eyebrow, #projects h2, #projects .section-intro, " +
         "#projects .project-card, " +
         "#contact .section-eyebrow, #contact h2, " +
-        "#contact > p:not(.section-eyebrow), #contact .contact-link"
+        "#contact > p:not(.section-eyebrow), #contact .contact-panel"
     );
 
     const revealObserver = new IntersectionObserver((entries) => {
