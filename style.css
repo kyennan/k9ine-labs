@@ -516,3 +516,17 @@ nav a {
 .project-actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 16px; }
 .project-actions .project-link { display: inline-flex; align-items: center; }
 .project-actions .project-link:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; border-radius: 3px; }
+
+/* SECTION REVEALS: only activated after JavaScript confirms support */
+.reveal-ready {
+    opacity: 0;
+    translate: 0 28px;
+    transition: opacity 750ms ease, translate 750ms cubic-bezier(.2,.8,.2,1);
+}
+.reveal-ready.reveal-visible {
+    opacity: 1;
+    translate: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+    .reveal-ready { opacity: 1; translate: none; transition: none; }
+}
