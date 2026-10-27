@@ -73,12 +73,12 @@ if (sceneContainer && typeof THREE !== "undefined") {
     scene.add(sculpture);
     const geometry = new THREE.TorusKnotGeometry(1.12, 0.31, 120, 20, 2, 3);
     const core = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
-        color: 0x4c1d95, metalness: 0.65, roughness: 0.27,
-        emissive: 0x260a55, emissiveIntensity: 0.38
+        color: 0x7352d5, metalness: 0.42, roughness: 0.3,
+        emissive: 0x37218a, emissiveIntensity: 0.65
     }));
     sculpture.add(core);
     const wire = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
-        color: 0xbca4ff, wireframe: true, transparent: true, opacity: 0.32,
+        color: 0xd3c4ff, wireframe: true, transparent: true, opacity: 0.38,
         depthWrite: false
     }));
     wire.scale.setScalar(1.012);
@@ -136,7 +136,8 @@ if (sceneContainer && typeof THREE !== "undefined") {
     function animate() {
         frameId = requestAnimationFrame(animate);
         const delta = Math.min(clock.getDelta(), 0.05);
-        const speed = reducedMotion ? 0.2 : 1;
+        const isPhone = window.matchMedia("(max-width: 700px)").matches;
+        const speed = reducedMotion ? 0.35 : (isPhone ? 1.65 : 1);
         sculpture.rotation.x += delta * 0.12 * speed;
         sculpture.rotation.y += delta * 0.24 * speed;
         orbitA.rotation.z += delta * 0.06 * speed;
