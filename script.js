@@ -55,65 +55,56 @@ if (hero) {
     });
 }
 
-/* K9INE LABS: FIRST THREE.JS SCENE */
-
+/* K9INE LABS: CINEMATIC THREE.JS SCENE */
 const sceneContainer = document.getElementById("three-container");
 
 if (sceneContainer && typeof THREE !== "undefined") {
     const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 100);
+    camera.position.set(0, 0, 6);
 
-    const camera = new THREE.PerspectiveCamera(
-        60,
-        sceneContainer.clientWidth / sceneContainer.clientHeight,
-        0.1,
-        100
-    );
-
-    camera.position.z = 5;
-
-    const renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-    });
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(
-        sceneContainer.clientWidth,
-        sceneContainer.clientHeight
-    );
-
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "low-power" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.setClearColor(0x000000, 0);
     sceneContainer.appendChild(renderer.domElement);
 
-    // Create a real 3D shape
-    const geometry = new THREE.TorusKnotGeometry(
-        1.2, 0.35, 100, 16
-    );
+    // A luminous sculpted knot with a fine wireframe skin.
+    const sculpture = new THREE.Group();
+    scene.add(sculpture);
+    const geometry = new THREE.TorusKnotGeometry(1.12, 0.31, 120, 20, 2, 3);
+    const core = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+        color: 0x4c1d95, metalness: 0.65, roughness: 0.27,
+        emissive: 0x260a55, emissiveIntensity: 0.38
+    }));
+    sculpture.add(core);
+    const wire = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
+        color: 0xbca4ff, wireframe: true, transparent: true, opacity: 0.32,
+        depthWrite: false
+    }));
+    wire.scale.setScalar(1.012);
+    sculpture.add(wire);
 
-    const material = new THREE.MeshStandardMaterial({
-        color: 0x8b5cf6,
-        metalness: 0.35,
-        roughness: 0.35,
-        wireframe: true
+    // Two slender orbit rings give the shape more depth and motion.
+    const orbitMaterial = new THREE.MeshBasicMaterial({
+        color: 0x8b5cf6, transparent: true, opacity: 0.38, depthWrite: false
     });
+    const orbitA = new THREE.Mesh(new THREE.TorusGeometry(2.0, 0.009, 5, 96), orbitMaterial);
+    orbitA.rotation.set(0.8, 0.4, 0.3);
+    scene.add(orbitA);
+    const orbitB = new THREE.Mesh(new THREE.TorusGeometry(1.75, 0.007, 5, 96),
+        new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.26, depthWrite: false }));
+    orbitB.rotation.set(-0.55, 0.7, -0.4);
+    scene.add(orbitB);
 
-    const object = new THREE.Mesh(geometry, material);
-    scene.add(object);
+    const ambient = new THREE.AmbientLight(0xb6a5ff, 1.5);
+    scene.add(ambient);
+    const key = new THREE.PointLight(0xc4b5fd, 48);
+    key.position.set(3, 3, 4);
+    scene.add(key);
+    const rim = new THREE.PointLight(0x4f46e5, 34);
+    rim.position.set(-3, -2, -2);
+    scene.add(rim);
 
-    // Add lighting
-    const ambientLight = new THREE.AmbientLight(0x8b7bd1, 1.2);
-    scene.add(ambientLight);
-
-    const pointLight = new THREE.PointLight(0xa78bfa, 35);
-    pointLight.position.set(3, 3, 5);
-    scene.add(pointLight);
-
-    // A cool rim light gives the knot more depth.
-    const rimLight = new THREE.PointLight(0x4f46e5, 24);
-    rimLight.position.set(-3, -2, -3);
-    scene.add(rimLight);
-
-
-// Track the mouse across the hero section.
     let targetMouseX = 0;
     let targetMouseY = 0;
     if (hero) {
@@ -127,29 +118,46 @@ if (sceneContainer && typeof THREE !== "undefined") {
             targetMouseY = 0;
         });
     }
+
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    function animate() {
-        requestAnimationFrame(animate);
-        // Keep the 3D sculpture moving on touch devices, even when the
-        // system requests reduced motion. Use a gentler speed in that case.
-        object.rotation.x += reducedMotion ? 0.0005 : 0.002;
-        object.rotation.y += reducedMotion ? 0.0008 : 0.0035;
-        camera.position.x += ((reducedMotion ? 0 : targetMouseX * 1.0) - camera.position.x) * 0.025;
-        camera.position.y += ((reducedMotion ? 0 : -targetMouseY * 0.65) - camera.position.y) * 0.025;
-        camera.lookAt(0, 0, 0);
-        renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener("resize", () => {
+    const clock = new THREE.Clock();
+    let frameId;
+    function resizeScene() {
         const width = sceneContainer.clientWidth;
         const height = sceneContainer.clientHeight;
-
         if (!width || !height) return;
-
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
+    }
+    resizeScene();
+    window.addEventListener("resize", resizeScene);
+
+    function animate() {
+        frameId = requestAnimationFrame(animate);
+        const delta = Math.min(clock.getDelta(), 0.05);
+        const speed = reducedMotion ? 0.2 : 1;
+        sculpture.rotation.x += delta * 0.12 * speed;
+        sculpture.rotation.y += delta * 0.24 * speed;
+        orbitA.rotation.z += delta * 0.06 * speed;
+        orbitB.rotation.y += delta * 0.09 * speed;
+        const time = clock.elapsedTime;
+        sculpture.position.y = Math.sin(time * 0.7 * speed) * 0.12;
+        camera.position.x += ((reducedMotion ? 0 : targetMouseX * 0.65) - camera.position.x) * 0.025;
+        camera.position.y += ((reducedMotion ? 0 : -targetMouseY * 0.4) - camera.position.y) * 0.025;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // Avoid wasting GPU power when the page is hidden.
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            cancelAnimationFrame(frameId);
+        } else {
+            clock.getDelta();
+            cancelAnimationFrame(frameId);
+            animate();
+        }
     });
 }
