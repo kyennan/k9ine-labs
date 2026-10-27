@@ -163,33 +163,31 @@ if (sceneContainer && typeof THREE !== "undefined") {
     });
 }
 
-/* K9INE LABS: SCROLL REVEALS */
-// Only hide elements after we know IntersectionObserver is available.
-// Reduced-motion users see everything immediately.
+/* K9INE LABS: REPLAYABLE SCROLL REVEALS */
+// Observe each section continuously so it can animate again when revisited.
+// Respect reduced-motion preferences: no hidden content or forced animation.
 if ("IntersectionObserver" in window &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const revealItems = document.querySelectorAll(
-        ".about-section .section-eyebrow, .about-layout > div, " +
-        "#projects .section-eyebrow, #projects > h2, #projects .section-intro, " +
-        ".projects-grid .project-card, " +
-        ".contact-section .section-eyebrow, .contact-section h2, " +
-        ".contact-section > p:not(.section-eyebrow), .contact-link"
+        "#about .section-eyebrow, #about .about-layout > div, " +
+        "#projects .section-eyebrow, #projects h2, #projects .section-intro, " +
+        "#projects .project-card, " +
+        "#contact .section-eyebrow, #contact h2, " +
+        "#contact > p:not(.section-eyebrow), #contact .contact-link"
     );
 
-    const revealObserver = new IntersectionObserver((entries, observer) => {
+    const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("reveal-visible");
-                observer.unobserve(entry.target);
-            }
+            entry.target.classList.toggle("reveal-visible", entry.isIntersecting);
         });
-    }, { threshold: 0.08, rootMargin: "0px 0px -24px 0px" });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
 
     revealItems.forEach((item) => {
-        // Never hide something that is already visible at page load.
+        // Items already in view stay visible at startup.
         const rect = item.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) return;
+        const onScreen = rect.top < window.innerHeight && rect.bottom > 0;
         item.classList.add("reveal-ready");
+        if (onScreen) item.classList.add("reveal-visible");
         revealObserver.observe(item);
     });
 }
