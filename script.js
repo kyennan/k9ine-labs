@@ -64,7 +64,8 @@ if (sceneContainer && typeof THREE !== "undefined") {
     camera.position.set(0, 0, 6);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "low-power" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    const phoneMedia = window.matchMedia("(max-width: 700px)");
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, phoneMedia.matches ? 1.25 : 1.75));
     renderer.setClearColor(0x000000, 0);
     sceneContainer.appendChild(renderer.domElement);
 
@@ -121,23 +122,31 @@ if (sceneContainer && typeof THREE !== "undefined") {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const clock = new THREE.Clock();
-    let frameId;
+    let frameId = null;
+    let running = false;
+    let sceneInView = true;
+    let lastRenderTime = 0;
+    const phoneFrameInterval = 1000 / 30; // Cap mobile rendering at 30 FPS.
     function resizeScene() {
         const width = sceneContainer.clientWidth;
         const height = sceneContainer.clientHeight;
         if (!width || !height) return;
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, phoneMedia.matches ? 1.25 : 1.75));
         renderer.setSize(width, height);
     }
     resizeScene();
     window.addEventListener("resize", resizeScene);
 
-    function animate() {
+    function animate(now) {
+        if (!running) return;
         frameId = requestAnimationFrame(animate);
+        // Skip excess frames on phones to reduce GPU and battery usage.
+        if (phoneMedia.matches && now - lastRenderTime < phoneFrameInterval) return;
+        lastRenderTime = now;
         const delta = Math.min(clock.getDelta(), 0.05);
-        const isPhone = window.matchMedia("(max-width: 700px)").matches;
-        const speed = reducedMotion ? 0.35 : (isPhone ? 1.65 : 1);
+        const speed = reducedMotion ? 0.35 : (phoneMedia.matches ? 1.65 : 1);
         sculpture.rotation.x += delta * 0.12 * speed;
         sculpture.rotation.y += delta * 0.24 * speed;
         orbitA.rotation.z += delta * 0.06 * speed;
@@ -149,18 +158,28 @@ if (sceneContainer && typeof THREE !== "undefined") {
         camera.lookAt(0, 0, 0);
         renderer.render(scene, camera);
     }
-    animate();
-
-    // Avoid wasting GPU power when the page is hidden.
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
+    function syncRendering() {
+        const shouldRun = !document.hidden && sceneInView;
+        if (shouldRun === running) return;
+        running = shouldRun;
+        if (running) {
+            clock.getDelta(); // Discard time spent paused.
+            lastRenderTime = 0;
+            frameId = requestAnimationFrame(animate);
+        } else if (frameId !== null) {
             cancelAnimationFrame(frameId);
-        } else {
-            clock.getDelta();
-            cancelAnimationFrame(frameId);
-            animate();
+            frameId = null;
         }
-    });
+    }
+    if ("IntersectionObserver" in window) {
+        const sceneObserver = new IntersectionObserver((entries) => {
+            sceneInView = entries[0].isIntersecting;
+            syncRendering();
+        }, { rootMargin: "150px 0px" });
+        sceneObserver.observe(sceneContainer);
+    }
+    document.addEventListener("visibilitychange", syncRendering);
+    syncRendering();
 }
 
 /* K9INE LABS: REPLAYABLE SCROLL REVEALS */
