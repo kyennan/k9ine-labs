@@ -162,3 +162,34 @@ if (sceneContainer && typeof THREE !== "undefined") {
         }
     });
 }
+
+/* K9INE LABS: SCROLL REVEALS */
+// Only hide elements after we know IntersectionObserver is available.
+// Reduced-motion users see everything immediately.
+if ("IntersectionObserver" in window &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const revealItems = document.querySelectorAll(
+        ".about-section .section-eyebrow, .about-layout > div, " +
+        "#projects .section-eyebrow, #projects > h2, #projects .section-intro, " +
+        ".projects-grid .project-card, " +
+        ".contact-section .section-eyebrow, .contact-section h2, " +
+        ".contact-section > p:not(.section-eyebrow), .contact-link"
+    );
+
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("reveal-visible");
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08, rootMargin: "0px 0px -24px 0px" });
+
+    revealItems.forEach((item) => {
+        // Never hide something that is already visible at page load.
+        const rect = item.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) return;
+        item.classList.add("reveal-ready");
+        revealObserver.observe(item);
+    });
+}
