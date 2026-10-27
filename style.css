@@ -666,3 +666,19 @@ header nav a.active::after { transform: scaleX(1); }
 .project-actions { margin-top: auto; padding-top: 12px; }
 .project-actions .project-link { padding: 6px 0; }
 @media (max-width: 650px) { .project-preview { height: 160px; } }
+
+/* PROJECT SHOWCASE 2.1: real image previews */
+.project-image-preview { padding: 0; background: #090d16; }
+.project-image-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 450ms ease, filter 450ms ease;
+}
+.project-card:hover .project-image-preview img { transform: scale(1.055); filter: brightness(1.08); }
+@media (prefers-reduced-motion: reduce) {
+    .project-image-preview img { transition: none; }
+    .project-card:hover .project-image-preview img { transform: none; }
+}
